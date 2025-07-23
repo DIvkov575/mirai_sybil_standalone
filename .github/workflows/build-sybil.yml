@@ -1,4 +1,4 @@
-name: Build Sybil
+name: Build Mirai
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
             platform: linux
             arch: x64
             python-version: '3.8'
-          - os: macos-12
+          - os: macos-13
             platform: macos
             arch: intel
             python-version: '3.8'
@@ -61,14 +61,28 @@ jobs:
         run: |
           pyinstaller ark_sybil.spec --clean --noconfirm
 
-      - name: Test built binaries # sneaky stupid test (exec stops early -> Fail; exec doesn't stop within 15 sec -> Success)
+      - name: Test built binaries (survive ≥15s or fail)
+        run: |
+          # Windows
+          $process = Start-Process -FilePath "./dist/ark_run.exe" -PassThru
+          Start-Sleep -Seconds 15
+          if (! $process.HasExited) {
+            Write-Host "Process survived 15 seconds, success!"
+            Stop-Process -Id $process.Id
+            exit 0
+          } else {
+            Write-Host "Process exited before 15 seconds → fail"
+            exit 1
+          }
+        shell: pwsh
+        if: matrix.platform == 'windows'
+
+      - name: Test built binaries (survive ≥15s or fail)
         run: |
           set -e
-          ./dist/ark_sybil &
+          ./dist/ark_run &
           pid=$!
-          
           sleep 15
-          
           if kill -0 "$pid" 2>/dev/null; then
             echo "Process survived 15 seconds, success!"
             kill "$pid"
@@ -76,6 +90,9 @@ jobs:
             echo "Process exited before 15 seconds → fail"
             exit 1
           fi
+        shell: bash
+        if: matrix.platform != 'windows'
+
       - name: Create archive (Windows)
         if: matrix.platform == 'windows'
         run: |
