@@ -55,7 +55,7 @@ jobs:
           pip install setuptools wheel setuptools_scm
           pip install pyinstaller waitress gunicorn
           pip install -r requirements.txt
-          pip install -e --no-deps".[sybil]"
+          pip install -e --no-deps ".[sybil]"
           pip install imageio==2.34.1
           pip install numpy==1.24.1
           pip install opencv-python==4.5.4.60
