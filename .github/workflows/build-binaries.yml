@@ -1,0 +1,110 @@
+name: Build Cross-Platform Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            arch: x64
+            python-version: '3.9'
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            python-version: '3.9'
+          - os: macos-13
+            platform: macos
+            arch: intel
+            python-version: '3.10'
+          - os: macos-latest
+            platform: macos
+            arch: arm64
+            python-version: '3.10'
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/setup.cfg') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel setuptools_scm
+        pip install pyinstaller
+        pip install -r requirements.txt
+        pip install -e ".[mirai]"
+    
+    - name: Build binary with PyInstaller
+      run: |
+        pyinstaller ark_run.spec --clean --noconfirm
+    
+    - name: Create archive (Windows)
+      if: matrix.platform == 'windows'
+      run: |
+        cd dist
+        7z a -tzip ../ark-${{ matrix.platform }}-${{ matrix.arch }}.zip ark_run.exe
+    
+    - name: Create archive (Unix)
+      if: matrix.platform != 'windows'
+      run: |
+        cd dist
+        tar -czf ../ark-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ark_run
+    
+    - name: Upload Windows artifact
+      if: matrix.platform == 'windows'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ark-${{ matrix.platform }}-${{ matrix.arch }}
+        path: ark-${{ matrix.platform }}-${{ matrix.arch }}.zip
+    
+    - name: Upload Unix artifact
+      if: matrix.platform != 'windows'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ark-${{ matrix.platform }}-${{ matrix.arch }}
+        path: ark-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ark-windows-x64/ark-windows-x64.zip
+          ark-linux-x64/ark-linux-x64.tar.gz
+          ark-macos-intel/ark-macos-intel.tar.gz
+          ark-macos-arm64/ark-macos-arm64.tar.gz
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
