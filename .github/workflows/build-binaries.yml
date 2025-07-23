@@ -61,6 +61,10 @@ jobs:
         run: |
           pyinstaller ark_run.spec --clean --noconfirm
 
+      - name: Test built binaries
+        run: |
+          ./dist/ark_run --version
+
       - name: Create archive (Windows)
         if: matrix.platform == 'windows'
         run: |
