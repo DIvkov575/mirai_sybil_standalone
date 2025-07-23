@@ -22,11 +22,11 @@ jobs:
           - os: macos-13
             platform: macos
             arch: intel
-            python-version: '3.10'
+            python-version: '3.9'
           - os: macos-latest
             platform: macos
             arch: arm64
-            python-version: '3.10'
+            python-version: '3.9'
     
     runs-on: ${{ matrix.os }}
     
@@ -75,14 +75,14 @@ jobs:
     
     - name: Upload Windows artifact
       if: matrix.platform == 'windows'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ark-${{ matrix.platform }}-${{ matrix.arch }}
         path: ark-${{ matrix.platform }}-${{ matrix.arch }}.zip
     
     - name: Upload Unix artifact
       if: matrix.platform != 'windows'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ark-${{ matrix.platform }}-${{ matrix.arch }}
         path: ark-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
@@ -94,7 +94,7 @@ jobs:
     
     steps:
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
