@@ -14,19 +14,19 @@ jobs:
           - os: windows-latest
             platform: windows
             arch: x64
-            python-version: '3.9'
+            python-version: '3.8'
           - os: ubuntu-latest
             platform: linux
             arch: x64
-            python-version: '3.9'
+            python-version: '3.8'
           - os: macos-13
             platform: macos
             arch: intel
-            python-version: '3.9'
+            python-version: '3.8'
           - os: macos-latest
             platform: macos
             arch: arm64
-            python-version: '3.9'
+            python-version: '3.8'
     
     runs-on: ${{ matrix.os }}
     
