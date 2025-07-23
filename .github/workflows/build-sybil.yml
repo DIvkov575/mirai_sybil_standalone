@@ -49,14 +49,25 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install dependencies
+      - name: Install dependencies (Windows)
+        if: matrix.platform == 'windows-latest'
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools wheel setuptools_scm
-          pip install pyinstaller waitress gunicorn
+          pip install setuptools wheel setuptools_scm pyinstaller waitress gunicorn
           pip install -r requirements.txt
-          pip install -e ".[sybil]"
+          pip install -e ."[sybil]"
+          pip install imageio==2.34.1 numpy==1.24.1 opencv-python==4.5.4.60 opencv-python-headless==4.5.4.60 pillow>=10.2.0 pydicom==2.3.0 pylibjpeg[all]==2.0.0 tqdm==4.62.3
+          pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html
 
+      - name: Install dependencies (Linux and macOS)
+        if: matrix.platform != 'windows-latest'
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel setuptools_scm pyinstaller waitress gunicorn
+          pip install -r requirements.txt
+          pip install -e ."[sybil]"
+          pip install imageio==2.34.1 numpy==1.24.1 opencv-python==4.5.4.60 opencv-python-headless==4.5.4.60 pillow>=10.2.0 pydicom==2.3.0 pylibjpeg[all]==2.0.0 tqdm==4.62.3
+          pip install torch==1.13.1 torchvision==0.14.1
       - name: Build binary with PyInstaller
         run: |
           pyinstaller ark_sybil.spec --clean --noconfirm
