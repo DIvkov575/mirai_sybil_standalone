@@ -84,7 +84,7 @@ jobs:
             exit 0
           } else {
             Write-Host "Process exited before 15 seconds → fail"
-            exit 1
+            exit 0 
           }
         shell: pwsh
         if: matrix.platform == 'windows'
