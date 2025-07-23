@@ -3,3 +3,11 @@
 .idea
 __pycache__
 snapshots
+
+build/
+dist/
+*.iml
+static/_style.css
+templates/_index.html
+
+ark.igg-info/
