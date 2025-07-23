@@ -10,7 +10,7 @@ import api.config
 from api.config import PROJECT_DIR
 
 
-def find_free_port(start_port: int = 5000, end_port: int = 5020):
+def find_free_port(start_port: int = 5000, end_port: int = 5042):
     """
     Scans for a free TCP port in a given range.
 
@@ -112,6 +112,7 @@ def cli_entrypoint(model_name="auto"):
 
 def cli_entrypoint_sybil():
     import sybil
+    _ = sybil
     cli_entrypoint("sybil")
 
 #
