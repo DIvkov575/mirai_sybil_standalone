@@ -1,8 +1,8 @@
 import os
 import sys
 
-import api.app
-import api.config
+# import api.app
+# import api.config
 from api.config import DEFAULT_CONFIG_PATH, common_setup
 
 __doc__ = f"""

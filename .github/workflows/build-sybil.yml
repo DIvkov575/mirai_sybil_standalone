@@ -74,15 +74,15 @@ jobs:
 
       - name: Test built binaries (survive ≥15s or fail)
         run: |
-          # Windows
-          $process = Start-Process -FilePath "./dist/ark_sybil.exe" -PassThru
+          $job = Start-Job { & ./dist/ark_sybil.exe }
           Start-Sleep -Seconds 15
-          if (! $process.HasExited) {
+          if ($job.State -eq 'Running') {
             Write-Host "Process survived 15 seconds, success!"
-            Stop-Process -Id $process.Id
+            Stop-Job $job
             exit 0
           } else {
             Write-Host "Process exited before 15 seconds → fail"
+            Receive-Job $job
             exit 0 
           }
         shell: pwsh
