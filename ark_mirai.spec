@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['ark_run.py'],
+    ['ark_mirai_run.py'],
     pathex=[],
     binaries=[],
     datas=[
@@ -30,7 +30,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='ark_run',
+    name='ark_mirai',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

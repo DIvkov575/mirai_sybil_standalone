@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ark
-Version: 0.8.0
+Version: 0.8.2
 Summary: Simple web server for hosting deep learning models
 Author: Jacob Silterra, Harrison Le
 Author-email: silterra@mit.edu

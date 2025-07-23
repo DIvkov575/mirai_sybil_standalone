@@ -1,9 +1,9 @@
 LICENSE.txt
 MANIFEST.in
 README.md
-ark_run.py
 setup.cfg
 setup.py
+version.py
 api/__init__.py
 api/app.py
 api/config.py

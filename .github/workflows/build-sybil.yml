@@ -1,0 +1,127 @@
+name: Build Sybil
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            arch: x64
+            python-version: '3.8'
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            python-version: '3.8'
+          - os: macos-12
+            platform: macos
+            arch: intel
+            python-version: '3.8'
+          - os: macos-latest
+            platform: macos
+            arch: arm64
+            python-version: '3.8'
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/setup.cfg') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel setuptools_scm
+          pip install pyinstaller waitress gunicorn
+          pip install -r requirements.txt
+          pip install -e ".[sybil]"
+
+      - name: Build binary with PyInstaller
+        run: |
+          pyinstaller ark_sybil.spec --clean --noconfirm
+
+      - name: Test built binaries # sneaky stupid test (exec stops early -> Fail; exec doesn't stop within 15 sec -> Success)
+        run: |
+          set -e
+          ./dist/ark_sybil &
+          pid=$!
+          
+          sleep 15
+          
+          if kill -0 "$pid" 2>/dev/null; then
+            echo "Process survived 15 seconds, success!"
+            kill "$pid"
+          else
+            echo "Process exited before 15 seconds → fail"
+            exit 1
+          fi
+      - name: Create archive (Windows)
+        if: matrix.platform == 'windows'
+        run: |
+          cd dist
+          7z a -tzip ../ark-sybil-${{ matrix.platform }}-${{ matrix.arch }}.zip ark_sybil.exe
+
+      - name: Create archive (Unix)
+        if: matrix.platform != 'windows'
+        run: |
+          cd dist
+          tar -czf ../ark-sybil-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz ark_sybil
+
+      - name: Upload Windows artifact
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ark-sybil-${{ matrix.platform }}-${{ matrix.arch }}
+          path: ark-sybil-${{ matrix.platform }}-${{ matrix.arch }}.zip
+
+      - name: Upload Unix artifact
+        if: matrix.platform != 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ark-sybil-${{ matrix.platform }}-${{ matrix.arch }}
+          path: ark-sybil-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ark-sybil-windows-x64/ark-sybil-windows-x64.zip
+            ark-sybil-linux-x64/ark-sybil-linux-x64.tar.gz
+            ark-sybil-macos-intel/ark-sybil-macos-intel.tar.gz
+            ark-sybil-macos-arm64/ark-sybil-macos-arm64.tar.gz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
