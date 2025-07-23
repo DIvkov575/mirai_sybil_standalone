@@ -75,7 +75,7 @@ jobs:
       - name: Test built binaries (survive ≥15s or fail)
         run: |
           # Windows
-          $process = Start-Process -FilePath "./dist/ark_mirai.exe" -PassThru
+          $process = Start-Process -FilePath "./dist/ark_sybil.exe" -PassThru
           Start-Sleep -Seconds 15
           if (! $process.HasExited) {
             Write-Host "Process survived 15 seconds, success!"
@@ -91,7 +91,7 @@ jobs:
       - name: Test built binaries (survive ≥15s or fail)
         run: |
           set -e
-          ./dist/ark_mirai &
+          ./dist/ark_sybil &
           pid=$!
           sleep 15
           if kill -0 "$pid" 2>/dev/null; then
