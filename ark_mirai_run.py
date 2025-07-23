@@ -24,12 +24,10 @@ def find_free_port(start_port: int = 5000, end_port: int = 5020):
     print(f"Scanning for an available port from {start_port} to {end_port}...")
     for port in range(start_port, end_port + 1):
         try:
-            # Try to bind to the port. If it succeeds, the port is free.
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.bind(('127.0.0.1', port))
                 return port
         except OSError:
-            # If bind fails, the port is in use.
             print(f"Port {port} is in use, trying next...")
             continue
     return None
@@ -81,20 +79,17 @@ def cli_entrypoint(model_name="auto"):
 
     api.config.set_config_by_name(model_name)
 
-    # --- 2. Find an available port before launching the server ---
     port = find_free_port()
     if port is None:
         print("Error: Could not find an available port in the range 5000-5020.", file=sys.stderr)
         sys.exit(1)
 
     print(f"Found available port. Launching server on port {port}...")
-    # ---
 
     LOGLEVEL_KEY = "LOG_LEVEL"
     loglevel = os.environ.get(LOGLEVEL_KEY, "INFO")
     threads = os.environ.get("ARK_THREADS", "4")
     if platform.system() == "Windows":
-        # --- 3. Use the found port in the server command ---
         args = ["waitress-serve",
                 "--channel-timeout", "3600",
                 "--threads", threads,
@@ -102,7 +97,6 @@ def cli_entrypoint(model_name="auto"):
                 "--call", "main:create_app"]
 
     else:
-        # --- 3. Use the found port in the server command ---
         args = ["gunicorn",
                 "--bind", f"0.0.0.0:{port}",
                 "--timeout", "0",
@@ -114,8 +108,6 @@ def cli_entrypoint(model_name="auto"):
     proc = subprocess.run(args, stdout=None, stderr=None, text=True, cwd=PROJECT_DIR)
 
 
-# def cli_entrypoint_empty():
-#     cli_entrypoint("empty")
 
 
 def cli_entrypoint_mirai():
@@ -123,9 +115,6 @@ def cli_entrypoint_mirai():
     cli_entrypoint("mirai")
 
 #
-# def cli_entrypoint_sybil():
-#     import sybil
-#     cli_entrypoint("sybil")
 #
 
 if __name__ == "__main__":

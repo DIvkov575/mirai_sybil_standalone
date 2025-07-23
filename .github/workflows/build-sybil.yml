@@ -1,4 +1,4 @@
-name: Build Mirai
+name: Build Sybil
 
 on:
   push:
