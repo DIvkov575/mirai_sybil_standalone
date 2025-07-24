@@ -56,7 +56,7 @@ jobs:
             ~/.cache/pip/wheels
             ~/Library/Caches/pip/wheels
             %APPDATA%\pip\cache\wheels
-          key: ${{ runner.os }}-${{ matrix.arch }}-wheels-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-${{ matrix.arch }}-wheels-${{ matrix.python-version }}-${{ hashFiles('./requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.arch }}-wheels-${{ matrix.python-version }}-
             ${{ runner.os }}-${{ matrix.arch }}-wheels-
