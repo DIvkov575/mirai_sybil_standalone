@@ -14,6 +14,7 @@ a = Analysis(
     hiddenimports=[
     'waitress',
     'gunicorn',
+    'torchio'
     ],
     hookspath=[],
     hooksconfig={},
