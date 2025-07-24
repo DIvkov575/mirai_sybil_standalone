@@ -66,9 +66,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools wheel setuptools_scm
           pip install pyinstaller waitress gunicorn
-          pip install -r requirements.txt
-          pip install .
-          pip install git+https://github.com/DIvkov575/Sybil@main
+          pip install '.[sybil]'
 
       - name: Build binary with PyInstaller
         run: |

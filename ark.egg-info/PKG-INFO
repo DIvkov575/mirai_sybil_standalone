@@ -26,7 +26,7 @@ Requires-Dist: tqdm==4.62.3
 Provides-Extra: mirai
 Requires-Dist: onconet@ git+https://github.com/reginabarzilaygroup/mirai@main ; extra == "mirai"
 Provides-Extra: sybil
-Requires-Dist: sybil@ git+https://github.com/reginabarzilaygroup/sybil@main ; extra == "sybil"
+Requires-Dist: sybil@ git+https://github.com/DIvkov575/Sybil@main ; extra == "sybil"
 
 # Introduction
 

@@ -18,4 +18,4 @@ waitress==3.0.0
 onconet@ git+https://github.com/reginabarzilaygroup/mirai@main
 
 [sybil]
-sybil@ git+https://github.com/reginabarzilaygroup/sybil@main
+sybil@ git+https://github.com/DIvkov575/Sybil@main
