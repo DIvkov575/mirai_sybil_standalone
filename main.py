@@ -2,6 +2,7 @@ import os
 import sys
 
 import api
+import api.app
 import api.config
 from api.config import DEFAULT_CONFIG_PATH, common_setup
 
