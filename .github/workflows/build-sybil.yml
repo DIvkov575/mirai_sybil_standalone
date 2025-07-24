@@ -49,6 +49,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Cache wheel builds
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip/wheels
+            ~/Library/Caches/pip/wheels
+            %APPDATA%\pip\cache\wheels
+          key: ${{ runner.os }}-${{ matrix.arch }}-wheels-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.arch }}-wheels-${{ matrix.python-version }}-
+            ${{ runner.os }}-${{ matrix.arch }}-wheels-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
