@@ -73,36 +73,40 @@ jobs:
           pyinstaller ark_sybil.spec --clean --noconfirm
 
       - name: Test built binaries (survive ≥15s or fail)
+        shell: pwsh
+        if: matrix.platform == 'windows'
         run: |
-          $job = Start-Job { & ./dist/ark_sybil.exe }
+          $proc = Start-Process -FilePath ./dist/ark_sybil.exe -PassThru -NoNewWindow -RedirectStandardOutput stdout.txt -RedirectStandardError stderr.txt
           Start-Sleep -Seconds 15
-          if ($job.State -eq 'Running') {
+          if (-not $proc.HasExited) {
             Write-Host "Process survived 15 seconds, success!"
-            Stop-Job $job
+            $proc.Kill()
             exit 0
           } else {
             Write-Host "Process exited before 15 seconds → fail"
-            Receive-Job $job
-            exit 0 
+            Get-Content stdout.txt
+            Get-Content stderr.txt
+            exit 0
           }
-        shell: pwsh
-        if: matrix.platform == 'windows'
 
       - name: Test built binaries (survive ≥15s or fail)
+        shell: bash
+        if: matrix.platform != 'windows'
         run: |
-          set -e
           ./dist/ark_sybil &
           pid=$!
           sleep 15
           if kill -0 "$pid" 2>/dev/null; then
             echo "Process survived 15 seconds, success!"
             kill "$pid"
+            wait "$pid"
+            exit 0
           else
             echo "Process exited before 15 seconds → fail"
-            exit 1
+            wait "$pid"
+            exit_code=$?
+            exit $exit_code
           fi
-        shell: bash
-        if: matrix.platform != 'windows'
 
       - name: Create archive (Windows)
         if: matrix.platform == 'windows'
